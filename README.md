@@ -20,7 +20,7 @@ A web-based application that allows users to create their resumes dynamically.
 
 ## Getting Started
 
-To view the website, simply visit [https://resume-generator.github.io](https://resume-generator.github.io).
+To view the website, simply visit [[https://resume-generator.github.io](https://srrtth.github.io/resumegenerator.github.io/)]([https://resume-generator.github.io](https://srrtth.github.io/resumegenerator.github.io/)).
 
 If you want to run the website locally, follow these steps:
 
