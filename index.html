@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Resume Builder</title>
+  <style>
+    /* Add your CSS styling here */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1d1d1d;
+      color: #ffffff;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #CEFA05;
+    }
+
+    form {
+      margin-bottom: 20px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      color: #CEFA05;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #CEFA05;
+      padding-bottom: 5px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: none;
+      background-color: #343434;
+      color: #ffffff;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #CEFA05;
+      border: none;
+      color: #000;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #bada55;
+    }
+
+    .entry {
+      margin-bottom: 10px;
+    }
+
+    .removeEntry {
+      margin-left: 10px;
+      background-color: #FF0000;
+      color: #FFF;
+      transition: background-color 0.3s ease;
+    }
+
+    .removeEntry:hover {
+      background-color: #ff5555;
+    }
+
+    #preview {
+      margin-bottom: 30px;
+      background-color: #1d1d1d;
+      color: #ffffff;
+      padding: 20px;
+    }
+
+    #preview h2,
+    #preview h3,
+    #preview p {
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>SAR Highperformance</h1>
+    <div class="center">
+      <h2>Resume Builder</h2>
+    </div>
+    <form id="resumeForm">
+      <div class="section">
+        <h2>Personal Information</h2>
+        <input type="text" name="name" placeholder="Full Name" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="text" name="phone" placeholder="Phone" required>
+      </div>
+      <div id="educationSection" class="section">
+        <h2>Education</h2>
+        <div class="educationEntry">
+          <input type="text" name="university[]" placeholder="University" required>
+          <input type="text" name="degree[]" placeholder="Degree" required>
+          <input type="text" name="graduationYear[]" placeholder="Graduation Year" required>
+          <button type="button" class="removeEntry">Remove</button>
+        </div>
+        <button type="button" class="addEntry">Add Education</button>
+      </div>
+      <div id="experienceSection" class="section">
+        <h2>Experience</h2>
+        <div class="experienceEntry">
+          <input type="text" name="company[]" placeholder="Company" required>
+          <input type="text" name="position[]" placeholder="Position" required>
+          <textarea name="description[]" placeholder="Description" required></textarea>
+          <button type="button" class="removeEntry">Remove</button>
+        </div>
+        <button type="button" class="addEntry">Add Experience</button>
+      </div>
+      <div id="customSections" class="section">
+        <h2>Custom Sections</h2>
+        <div class="customEntry">
+          <input type="text" name="customTitle[]" placeholder="Section Title" required>
+          <textarea name="customContent[]" placeholder="Section Content" required></textarea>
+          <button type="button" class="removeEntry">Remove</button>
+        </div>
+        <button type="button" class="addEntry">Add Custom Section</button>
+      </div>
+      <button type="submit">Generate Resume</button>
+    </form>
+    <div id="preview"></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.3/jspdf.umd.min.js"></script>
+  <script>
+    // Function to add a new entry
+    function addEntry(sectionId) {
+      var section = document.getElementById(sectionId);
+      var entry = document.createElement('div');
+      entry.classList.add('entry');
+      entry.innerHTML = `
+        <input type="text" name="${sectionId}Title[]" placeholder="Section Title" required>
+        <textarea name="${sectionId}Content[]" placeholder="Section Content" required></textarea>
+        <button type="button" class="removeEntry">Remove</button>
+      `;
+      section.appendChild(entry);
+
+      var removeButtons = document.getElementsByClassName('removeEntry');
+      for (var i = 0; i < removeButtons.length; i++) {
+        removeButtons[i].addEventListener('click', removeEntry);
+      }
+    }
+
+    // Function to remove an entry
+    function removeEntry(event) {
+      event.target.parentElement.remove();
+    }
+
+    // Add event listeners to dynamically add/remove entries
+    Array.from(document.getElementsByClassName('addEntry')).forEach(function(button) {
+      button.addEventListener('click', function(event) {
+        var sectionId = event.target.parentElement.id;
+        addEntry(sectionId);
+      });
+    });
+
+    Array.from(document.getElementsByClassName('removeEntry')).forEach(function(button) {
+      button.addEventListener('click', removeEntry);
+    });
+
+    // Form submission and resume generation
+    document.getElementById('resumeForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      // Get form values
+      var name = document.getElementsByName('name')[0].value;
+      var email = document.getElementsByName('email')[0].value;
+      var phone = document.getElementsByName('phone')[0].value;
+
+      var universities = document.getElementsByName('university[]');
+      var degrees = document.getElementsByName('degree[]');
+      var graduationYears = document.getElementsByName('graduationYear[]');
+
+      var companies = document.getElementsByName('company[]');
+      var positions = document.getElementsByName('position[]');
+      var descriptions = document.getElementsByName('description[]');
+
+      var customTitles = document.getElementsByName('customTitle[]');
+      var customContents = document.getElementsByName('customContent[]');
+
+      // Generate resume HTML
+      var resumeHTML = `
+        <h2>${name}</h2>
+        <p>Email: ${email}</p>
+        <p>Phone: ${phone}</p>
+
+        <h2>Education</h2>
+      `;
+
+      for (var i = 0; i < universities.length; i++) {
+        var university = universities[i].value;
+        var degree = degrees[i].value;
+        var graduationYear = graduationYears[i].value;
+
+        resumeHTML += `
+          <p>${degree}, ${university} (${graduationYear})</p>
+        `;
+      }
+
+      resumeHTML += `
+        <h2>Experience</h2>
+      `;
+
+      for (var i = 0; i < companies.length; i++) {
+        var company = companies[i].value;
+        var position = positions[i].value;
+        var description = descriptions[i].value;
+
+        resumeHTML += `
+          <p>${position} at ${company}</p>
+          <p>${description}</p>
+        `;
+      }
+
+      resumeHTML += `
+        <h2>Custom Sections</h2>
+      `;
+
+      for (var i = 0; i < customTitles.length; i++) {
+        var customTitle = customTitles[i].value;
+        var customContent = customContents[i].value;
+
+        resumeHTML += `
+          <h3>${customTitle}</h3>
+          <p>${customContent}</p>
+        `;
+      }
+
+      // Display generated resume
+      document.getElementById('preview').innerHTML = "<h2>Preview:</h2>";
+      document.getElementById('preview').innerHTML += resumeHTML;
+
+      // Generate PDF
+      var doc = new jsPDF();
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(20);
+      doc.text(20, 20, name);
+      doc.setFontSize(12);
+      doc.setTextColor(100);
+      doc.text(20, 30, "Email: " + email);
+      doc.text(20, 36, "Phone: " + phone);
+
+      var yPos = 46;
+      doc.setFontSize(16);
+      doc.text(20, yPos, "Education");
+      doc.setFontSize(12);
+      doc.setTextColor(100);
+      yPos += 10;
+
+      for (var i = 0; i < universities.length; i++) {
+        var university = universities[i].value;
+        var degree = degrees[i].value;
+        var graduationYear = graduationYears[i].value;
+
+        doc.text(20, yPos, degree + ", " + university + " (" + graduationYear + ")");
+        yPos += 6;
+      }
+
+      yPos += 10;
+      doc.setFontSize(16);
+      doc.text(20, yPos, "Experience");
+      doc.setFontSize(12);
+      doc.setTextColor(100);
+      yPos += 10;
+
+      for (var i = 0; i < companies.length; i++) {
+        var company = companies[i].value;
+        var position = positions[i].value;
+        var description = descriptions[i].value;
+
+        doc.text(20, yPos, position + " at " + company);
+        yPos += 6;
+        doc.setFontStyle("italic");
+        doc.text(20, yPos, description);
+        doc.setFontStyle("normal");
+        yPos += 6;
+      }
+
+      yPos += 10;
+      doc.setFontSize(16);
+      doc.text(20, yPos, "Custom Sections");
+      doc.setFontSize(12);
+      doc.setTextColor(100);
+      yPos += 10;
+
+      for (var i = 0; i < customTitles.length; i++) {
+        var customTitle = customTitles[i].value;
+        var customContent = customContents[i].value;
+
+        doc.setFontStyle("bold");
+        doc.text(20, yPos, customTitle);
+        doc.setFontStyle("normal");
+        yPos += 6;
+        doc.text(20, yPos, customContent);
+        yPos += 6;
+      }
+
+      // Save and download the PDF
+      doc.save("resumebySAR.pdf");
+    });
+  </script>
+</body>
+</html>
